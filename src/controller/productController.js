@@ -16,7 +16,7 @@ let createProduct = async function(req,res){
     // check All Mandatory tag present or not , and it's contain proper value or not
 
     if(!vfy.isValid(title)) return res.status(400).send({status:false, message:"Title tag is Required"})
-    title = vfy.removeSpaces(title) 
+    title = title.trim() 
 
     if(!vfy.isValid(description )) return res.status(400).send({status:false, message:"Description tag is Required"}) 
     description=vfy.removeSpaces(description) 
@@ -43,7 +43,7 @@ let createProduct = async function(req,res){
 
     if(style || style==''){
         if(!vfy.isValid(style)) return res.status(400).send({status:false, message:"If you are provide stype key then you have to provide some data"}) 
-        style = removeSpaces(style)
+        style = vfy.removeSpaces(style)
     }
 
 
@@ -222,8 +222,9 @@ let updateProduct = async function(req,res){
 
         if(price || price ==''){
             if(!vfy.isValid(price)) return res.status(400).send({status:false, message:"Please provide price"});
+             price= vfy.removeSpaces(price)
             if(!vfy.IsNumeric(price)) return res.status(400).send({status:false, message:"price must be a number"});
-            filter.price = removeSpaces(price) 
+            filter.price = price
         }
         if(currencyId || currencyId==''){
             if(!vfy.isValid(currencyId)) return res.status(400).send({status:false, message:"CurrencyId tag is Required"}); 

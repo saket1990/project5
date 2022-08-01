@@ -28,7 +28,7 @@ let isValidPhone = function (number) {
     return phoneRegex.test(number);
 }
 function removeSpaces(x){
-    return x.split(" ").filter((y)=> y ).join(" ")
+    return x.split(" ").filter((y)=> y ).join("")
 }
 let isValidEmail = function (email) {
     let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
