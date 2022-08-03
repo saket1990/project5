@@ -3,6 +3,7 @@ let router=express.Router()
 let controller = require("../controller/user")
 let productController =require("../controller/productController")
 let middleware = require("../middleware/auth")
+let cartController  = require("../controller/cartController")
 
 
 router.post('/register', controller.createUser)
@@ -20,7 +21,11 @@ router.put('/products/:productId', productController.updateProduct);
 router.delete('/products/:productId', productController.deleteProductById);
 
 
-
+//cart 
+router.post("/users/:userId/cart" ,cartController.createCart)
+router.put("/users/:userId/cart" ,cartController.updateCart)
+router.get("/users/:userId/cart" ,cartController.getCart)
+router.delete("/users/:userId/cart" ,cartController.deleteCart)
 router.all("/**", function (req, res) {
     res.status(404).send({
         status: false,

@@ -173,7 +173,7 @@ const getUser = async function (req, res) {
     try {
 
         const userId = req.params.userId
-        if (!isValidObjectId(userId)) 
+        if (!vfy.isValidObjectId(userId)) 
             return res.status(400).send({ status: false, message: "User Id is not valid" });
 
             const profDetails = await userModel.findById({ _id : userId })
@@ -287,7 +287,7 @@ const update = async (req, res) => {
 
                 if (!shipping.pincode || !vfy.isPincodeValid(shipping.pincode)||  isNaN(shipping.pincode)  )
                      return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for shipping" });
-                    user.address.shipping.pincode =  vfy.removeSpaces(shipping.pincode)
+                    user.address.shipping.pincode =  shipping.pincode
                 
             }
 
@@ -306,7 +306,7 @@ const update = async (req, res) => {
 
                 if (!billing.pincode || !vfy.isPincodeValid(billing.pincode)||  isNaN(shipping.pincode)  ) 
                    return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for billing" });
-                   user.address.billing.pincode =  vfy.removeSpaces(billing.pincode)
+                   user.address.billing.pincode =  billing.pincode
                      
                 
                 
