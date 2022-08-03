@@ -23,7 +23,7 @@ const createCart = async (req, res) => {
         // validate quantity
         // if (vfy.isEmptyVar(quantity)) return unsuccess(res, 400, ' Quantity must be required!')
         if (typeof quantity != 'number') return unsuccess(res, 400, ' Quantity must be a number!')
-        if (Number(quantity) < 1) return unsuccess(res, 400, ' Quantity value is >= 1 !')
+        if (Number(quantity) < 1 ) return unsuccess(res, 400, ' Quantity value is >= 1 !')
 
         // is a valid id 
         if (!vfy.isValidObjectId(userId)) return unsuccess(res, 400, ' Invalid userId !')
@@ -57,12 +57,15 @@ const createCart = async (req, res) => {
                         break;
                     }
                 }
+            
+            if (flag !=1) {
+                 cart.items.push({ productId, quantity })
+                console.log(cart.items)
+                // let index = cart.items.indexOf(addItem.productId)
+                // console.log(index)
+               // cart.items[index].quantity = req.body.quantity
             }
-            if (flag != 1) {
-                let addItem = cart.items.push({ productId, quantity })
-                let index = cart.items.indexOf(addItem.productId)
-                cart.items[index].quantity = quantity
-            }
+        }
             // now going to calculate total price
 
             let totalPrice = cart.totalPrice + (quantity * product.price)
@@ -70,11 +73,12 @@ const createCart = async (req, res) => {
             cart.totalPrice = Math.round(totalPrice * 100) / 100;
 
             let totalQuantity = cart.items.length
-            cart.totalQuantity = totalQuantity;
+            console.log(totalQuantity)
+            cart.totalItems = totalQuantity;
 
 
 
-
+   
             // console.log(cart)
             // let index = -1;
             // for (let i = 0; i < cart.items.length; i++) {
