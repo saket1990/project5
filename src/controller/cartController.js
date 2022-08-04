@@ -15,6 +15,8 @@ const createCart = async (req, res) => {
         // destructure data here
         let { productId, quantity, cartId } = data
         // if quantity does't exist then add 1 default
+        if (quantity < 1 ) return unsuccess(res, 400, ' Quantity value is >= 1 !')
+        if (typeof quantity != 'number') return unsuccess(res, 400, ' Quantity must be a number!')
         quantity = quantity || 1;
         // basic validations
         // validate products 
@@ -22,8 +24,6 @@ const createCart = async (req, res) => {
         if (!vfy.isValidObjectId(productId)) return unsuccess(res, 400, ' Invalid ProductId!')
         // validate quantity
         // if (vfy.isEmptyVar(quantity)) return unsuccess(res, 400, ' Quantity must be required!')
-        if (typeof quantity != 'number') return unsuccess(res, 400, ' Quantity must be a number!')
-        if (Number(quantity) < 1 ) return unsuccess(res, 400, ' Quantity value is >= 1 !')
 
         // is a valid id 
         if (!vfy.isValidObjectId(userId)) return unsuccess(res, 400, ' Invalid userId !')
@@ -56,7 +56,7 @@ const createCart = async (req, res) => {
                         flag = 1;
                         break;
                     }
-                }
+                }//product exists if flag==1
             
             if (flag !=1) {
                  cart.items.push({ productId, quantity })
@@ -162,13 +162,13 @@ const updateCart = async (req, res) => {
         // validate cartID
         if (vfy.isEmptyVar(cartId)) return unsuccess(res, 400, ' CartId must be required!')
         if (!vfy.isValidObjectId(cartId)) return unsuccess(res, 400, ' Invalid cartId !')
-
+       
         // check if the cart is already exist or not
         const cart = await cartModel.findOne({ userId })
         if (!cart) return unsuccess(res, 404, ' Cart not found!')
         // check both cartid's from req.body and db cart are match or not?
         if (cart._id != cartId) return unsuccess(res, 400, ' CartId does\'t belong to this user!')
-
+        
         // we neeed to check if the item already exist in my item's list or NOT!!
 
         let flag = -1;
@@ -178,6 +178,9 @@ const updateCart = async (req, res) => {
 
                 flag = i;
                 break;
+            }
+            else {
+                return res.status(400).send({status :false , Message:"this product'id is not available ...pls try another"})
             }
         }
         if (!cart.items[flag]) { return res.status(400).send({ status: false, Message: "item is not present or already deleted" }) }
@@ -239,9 +242,10 @@ const getCart = async function (req, res) {
             const userId = req.params.userId
             // authroization is being checked through Auth(Middleware)
             const checkCart = await cartModel.findOne({ userId: userId })
+            if(checkCart.items.length==0) return res.status(400).send({status:false , Message: "this cart is already deleted"})
             if (!checkCart) { return res.status(400).send({ status: false, Message: 'cart not found ' }) }
             await cartModel.findOneAndUpdate({ userId: userId }, { items: [], totalPrice: 0, totalItems: 0 })
-            res.status(200).send({ status: true, Message: 'sucessfully deleted' })
+            res.status(204).send({ status: true, Message: 'sucessfully deleted' })
         } catch (error) { res.status(500).send({ status: false, Message: error.message }) }
     }
 
