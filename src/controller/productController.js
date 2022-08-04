@@ -250,7 +250,7 @@ let updateProduct = async function(req,res){
 
         if(installments || installments == ''){
             if(!vfy.isValid(installments)) return res.status(400).send({status:false, message:"installments tag is required"}) 
-            if(!vfy.IsNumuric(installments)) return res.status(400).send({status:false, message:"installments must be number"})
+            if(!vfy.IsNumeric(installments)) return res.status(400).send({status:false, message:"installments must be number"})
             if(installments==isProductIdExist.installments)return res.status(400).send({status:false, message:"already Available"})
             filter.installments = installments  
         }

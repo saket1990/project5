@@ -4,6 +4,7 @@ let controller = require("../controller/user")
 let productController =require("../controller/productController")
 let middleware = require("../middleware/auth")
 let cartController  = require("../controller/cartController")
+let orderController =require("../controller/orderController")
 
 
 router.post('/register', controller.createUser)
@@ -26,10 +27,15 @@ router.post("/users/:userId/cart" ,cartController.createCart)
 router.put("/users/:userId/cart" ,cartController.updateCart)
 router.get("/users/:userId/cart" ,cartController.getCart)
 router.delete("/users/:userId/cart" ,cartController.deleteCart)
+
+//order
+router.post("/users/:userId/orders" ,orderController.createOrder)
+router.put("/users/:userId/orders" ,orderController.updateOrder)
+
 router.all("/**", function (req, res) {
     res.status(404).send({
         status: false,
-        msg: "The api you requested is not available"
+        msg: "The api you requested is not available"  
     })
 })
 
