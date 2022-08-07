@@ -83,8 +83,7 @@ let checkArrContent = (array, ...isContentArray) => {
     });
     return count == 0 ? true : false
 }
-
-let checkAllSizes = function (allSizes,available){
+let checkAllSizes = function (allSizes){
 
     let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"];
 
@@ -97,7 +96,10 @@ let checkAllSizes = function (allSizes,available){
    }
 
 
+
    let checkAllSizesForUpdate = async function (allSizes,available){
+    let arr = ["S", "XS", "M", "X", "L", "XXL", "XL"];
+
     for(let i=0;i<allSizes.length;i++){
         allSizes[i]=allSizes[i].trim();
       if(!arr.includes(allSizes[i])) return false

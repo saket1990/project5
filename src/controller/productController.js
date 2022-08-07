@@ -1,12 +1,12 @@
 const productModel = require("../models/productModel")
 const vfy = require('../utility/validation')
-
+const aws =require('../aws.config')
 
 
 let createProduct = async function(req,res){
 
     try{
-    let data = JSON.parse(JSON.stringify(req.body));
+    let data = req.body;
 
     // check body is empty or not
     if(vfy.isEmptyObject(data)) return res.status(400).send({status:false, message:"Please provide required Data"}) 
@@ -42,7 +42,7 @@ let createProduct = async function(req,res){
     }
 
     if(style || style==''){
-        if(!vfy.isValid(style)) return res.status(400).send({status:false, message:"If you are provide stype key then you have to provide some data"}) 
+        if(!vfy.isValid(style)) return res.status(400).send({status:false, message:"If you are provide style key then you have to provide some data"}) 
         style = vfy.removeSpaces(style)
     }
 
@@ -50,8 +50,8 @@ let createProduct = async function(req,res){
     if(!availableSizes) return res.status(400).send({ status: false, msg: "availableSizes should be present" })
 
 
-    let allSizes = availableSizes.split(",");
-    let bool = await checkAllSizes(allSizes);
+    let allSizes = availableSizes.split(",").map(x => x.trim().toUpperCase());
+    let bool = await vfy.checkAllSizes(allSizes);
     if(bool){
     availableSizes = [...allSizes]
     }
@@ -74,7 +74,7 @@ let createProduct = async function(req,res){
    let files = req.files;
    if(files.length==0) return res.status(400).send({ status: !true, message: "productImage is required" })
    if(!vfy.acceptFileType(files[0],'image/jpeg', 'image/png'))  return res.status(400).send({ status: false, message: "we accept jpg, jpeg or png as product image only" })
-   let myUrl = await uploadFile(files[0]);
+   let myUrl = await aws.uploadFile(files[0]);
 //    console.log(myUrl);
    productImage=myUrl;
 
@@ -109,50 +109,46 @@ const getProduct = async function (req, res) {
     let filters = { isDeleted: false }
 
     if (name) {
-        let findTitle = await productModel.find()
+        if(!vfy.isValid(name)){res.status(400).send({status:false , Message:"please provide valid name"})}
+        let findTitle = await productModel.find({title:name})
         let fTitle = findTitle.map(x => x.title).filter(x => x.includes(name))
 
-        filters.title = {$in : fTitle} // title me agar is array elements me se kuch bhi milra ho na to le aao 
+        filters.title = {$in:fTitle} 
     }
 
     if (size) {
         let size1 = size.split(",").map(x => x.trim().toUpperCase())
-        if (size1.map(x => isValidSize(x)).filter(x => x === false).length !== 0) return res.status(400).send({ status: false, message: "Size Should be among  S,XS,M,X,L,XXL,XL" })
-        filters.availableSizes = { $in: size1 }
+      
+            let correctSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+       
+        if (size1.map(x => correctSize.includes(x)).filter(x => x === false).length !== 0) return res.status(400).send({ status: false, message: "Size Should be among  S,XS,M,X,L,XXL,XL" })
+        filters.availableSizes = {$in : size1} 
     }
 
     if (priceGreaterThan) {
+        if(!vfy.IsNumeric(priceGreaterThan)){return res.status(400).send({status:false ,Message:"price must be number"})}
         filters.price = { $gt: priceGreaterThan }
     }
 
     if (priceLessThan) {
+        if(!vfy.IsNumeric(priceLessThan)){return res.status(400).send({status:false ,Message:"price must be number"})}
         filters.price = { $lt: priceLessThan }
     }
 
     if (priceGreaterThan && priceLessThan) {
-        filters.price = { $gt: priceGreaterThan, $lt: priceLessThan }
+         if(!vfy.IsNumeric(priceGreaterThan) || !vfy.IsNumeric(priceLessThan)){return res.status(400).send({status:false ,Message:"price must be number"})}
+         filters.price = { $gt: priceGreaterThan, $lt: priceLessThan }
     }
 
-if (priceSort) {
-    priceSort = priceSort.toString()
+    if (priceSort) {
+       
+       
+        let sort = ["1","-1"]
+        if (!sort.includes(priceSort)) {return res.status(400).send({status: false, message : "priceSort value can only be 1 or -1"})}
+    }
 
-    //sort = sort.toString()
-
-
-    const sortValue = function (value) {
-        return ["1", "-1"].indexOf(value) !== -1;
-    };
-    let value = sortValue(priceSort)
-
-
-    if (!value) return res.status(400).send({ status: false, Message: "PriceSort will accept only 1 & -1" })
-
-    sort = { price: priceSort }
-
-}
-
-    let getData = await productModel.find(filters).sort(sort)
-
+    let getData = await productModel.find(filters).sort({price:priceSort})
+    
     if (getData.length == 0) { return res.status(404).send({ status: false, message: "product not found or may be deleted" }) }
 
     return res.status(200).send({ status: true, count: getData.length, message: "products details", data: getData })
@@ -229,13 +225,13 @@ let updateProduct = async function(req,res){
         if(currencyId || currencyId==''){
             if(!vfy.isValid(currencyId)) return res.status(400).send({status:false, message:"CurrencyId tag is Required"}); 
             if(currencyId.toUpperCase()!="INR") return res.status(400).send({status:false, message:"Please provide currencyId only 'INR'"}); 
-            if(currencyId==isProductIdExist.currencyId) return res.status(400).send({status:false, message:"already Available"})
+            if(currencyId==isProductIdExist.currencyId) return res.status(400).send({status:false, message:"currency_Id already Available"})
             filter.currencyId=currencyId
         }
         if(currencyFormat || currencyFormat ==''){
             if(!vfy.isValid(currencyFormat)) return res.status(400).send({status:false, message:"CurrencyFormat tag is Required"});
             if(currencyFormat !="₹") return res.status(400).send({status:false, message:"Only Indian Currency ₹ accepted"});
-            if(filter.currencyFormat==isProductIdExist.currencyFormat) return res.status(400).send({status:false, message:"already Available"})
+            if(filter.currencyFormat==isProductIdExist.currencyFormat) return res.status(400).send({status:false, message:"currency_format already Available"})
             filter.currencyFormat=currencyFormat;
            
         }
@@ -243,7 +239,7 @@ let updateProduct = async function(req,res){
         if(style || style == ''){
             if(!vfy.isValid(style)) return res.status(400).send({status:false, message:"Please provide valid data"});
             style=vfy.removeSpaces(style);
-            if(style==isProductIdExist.style) return res.status(400).send({status:false, message:"already Available"}) 
+            if(style==isProductIdExist.style) return res.status(400).send({status:false, message:"style already Available"}) 
             filter.style=style;
         }
 
@@ -257,14 +253,15 @@ let updateProduct = async function(req,res){
         // yaha pr logic likhna hai .....
         if(availableSizes || availableSizes==''){
 
-            let allSizes = availableSizes.split(",");
-            let bool = await vfy.checkAllSizesForUpdate(allSizes,isProductIdExist.availableSizes);
+            let allSizes = availableSizes.split(",").map(x => x.trim().toUpperCase());
+            let bool = vfy.checkAllSizes(allSizes);
             if(bool){
-            availableSizes = [...isProductIdExist.availableSizes,...allSizes]
-            filter.availableSizes= availableSizes
+            // let availableSizes = [...allSizes]
+            filter.availableSizes= [...allSizes]
             }
+            if(!bool) return res.status(400).send({ status:false, Message: `availableSizes is accept like ["S", "XS", "M", "X", "L", "XXL", "XL"] !` })
 
-         if(!bool) return res.status(400).send({ status:false, Message: 'Duplicates Values not Allowed or availableSizes allowed like [S,XS, M,X, L, XXL,XL] !' })
+         //if(!bool) return res.status(400).send({ status:false, Message: 'Duplicates Values not Allowed or availableSizes allowed like [S,XS, M,X, L, XXL,XL] !' })
 
         }
 
@@ -281,8 +278,8 @@ let updateProduct = async function(req,res){
             if(!vfy.acceptFileType(files[0],'image/jpeg', 'image/png'))  return res.status(400).send({ status: false, message: "we accept jpg, jpeg or png as product image only" })
             
             // console.log(await uploadFile(files[0]))
-            let myUrl = await uploadFile(files[0]);
-            productImage=myUrl;
+            let myUrl = await aws.uploadFile(files[0]);
+           let productImage=myUrl;
             if(productImage == isProductIdExist.productImage) return res.status(400).send({status:false, message:"This url is Already available"});
             filter.productImage = productImage
          

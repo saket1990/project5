@@ -41,6 +41,7 @@ const createOrder = async function (req, res) {
 
 
 const updateOrder = async function (req, res) {
+   try{ 
     const userId = req.params.userId
     const requestBody = req.body
     //  Authroization is being checked through Auth(Middleware)
@@ -67,5 +68,7 @@ const updateOrder = async function (req, res) {
 
     const updateOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { $set: { status } }, { new: true })
     return res.status(200).send({ status: true, data: updateOrder, Message: " Order updated successfully" })
+}
+catch (error) { res.status(500).send({ status: false, Message: error.message }) }
 }
 module.exports={createOrder ,updateOrder}  

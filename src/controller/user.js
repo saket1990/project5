@@ -46,7 +46,7 @@ const createUser = async function (req, res) {
             
         const addressObject = vfy.isValidJSONstr(address)
          
-        if (!addressObject) return res.status(400).send({ status: false, Message: "Address json you are providing is not in a valid format " })
+        if (!addressObject) return res.status(400).send({ status: false, Message: "Address json you are providing is not in a valid format || or  pincode starts with 0  " })
 
         let {
             shipping,
@@ -62,6 +62,8 @@ const createUser = async function (req, res) {
         if (vfy.isEmptyObject(shipping)) return res.status(400).send({ status: false, Message: "Please provide shipping address" })
         if (vfy.isEmptyVar(shipping.street)) return res.status(400).send({ status: false, Message: "Plz provide shipping street..!!" });
         if (vfy.isEmptyVar(shipping.city)) return res.status(400).send({ status: false, Message: "Plz provide shipping city..!!" });
+        if(!vfy.isValidString(shipping.city)) return res.status(400).send({status:false ,Message:"shipping city should only be characters"})    
+                
         if (!shipping.pincode || isNaN(shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide shopping pincode" });
         if (!vfy.isPincodeValid(shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode" });
 
@@ -69,7 +71,10 @@ const createUser = async function (req, res) {
 
         if (vfy.isEmptyObject(billing)) return res.status(400).send({ status: false, Message: "Plz provide billing address.!!" });
         if (vfy.isEmptyVar(billing.street)) return res.status(400).send({ status: false, Message: "Plz provide billing street..!!" });
+        
         if (vfy.isEmptyVar(billing.city)) return res.status(400).send({ status: false, Message: "Plz provide billing city..!!" });
+        if(!vfy.isValidString(billing.city)) return res.status(400).send({status:false ,Message:"billing city should only be characters"})    
+                
         if (!billing.pincode || isNaN(billing.pincode)) return res.status(400).send({ status: false, Message: "Plz provide billing pincode" });
         if (!vfy.isPincodeValid(billing.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode" });
 
@@ -181,8 +186,8 @@ const getUser = async function (req, res) {
                { return res.status(404).send({ status: false, message: "User Id does not exist" }) }
             // console.log(req["decodedToken"])
             // if (req.headers["userId"] !== userId)
-            if (req["decodedToken"] !== userId)
-            return res.status(403).send({ status: false, msg: "User Id is not correct" })
+            // if (req["decodedToken"] !== userId)
+            // return res.status(403).send({ status: false, msg: "User Id is not correct" })
     
        return res.status(200).send({status: true, message: "User profile details", data : profDetails })
 
@@ -218,17 +223,17 @@ const update = async (req, res) => {
         console.log(data)
         
         if(fname){
-            if(vfy.isEmptyVar(fname))
-            return res.status(400).send({status:false , Message:"fname should not be empty"})
-                
+            if(vfy.isEmptyVar(fname))return res.status(400).send({status:false , Message:"fname should not be empty"})
+            if (!vfy.isValidString(fname)) return res.status(400).send({ status: false, message: "Please provide valid fname" })
+     
             user.fname=vfy.removeSpaces(fname);
             
             }
         
             if(lname){
-                if(vfy.isEmptyVar(lname))
-                return res.status(400).send({status:false , Message:"lname should not be empty"})
-                    
+                if(vfy.isEmptyVar(lname))return res.status(400).send({status:false , Message:"lname should not be empty"})
+                if (!vfy.isValidString(lname)) return res.status(400).send({ status: false, message: "Please provide valid lname" })
+     
                 user.lname=vfy.removeSpaces(lname);
                 
                 }

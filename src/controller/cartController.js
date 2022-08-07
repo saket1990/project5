@@ -28,7 +28,7 @@ const createCart = async (req, res) => {
         // is a valid id 
         if (!vfy.isValidObjectId(userId)) return unsuccess(res, 400, ' Invalid userId !')
 
-        // check broduct exist or not;
+        // check product exist or not;
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!product) return unsuccess(res, 404, ' productId not found!')
 
@@ -149,10 +149,11 @@ const updateCart = async (req, res) => {
         if (!vfy.isValidObjectId(productId)) return unsuccess(res, 400, ' Invalid ProductId!')
         // validate quantity
         if (isNaN(removeProduct)) return unsuccess(res, 400, ' removeProduct must be required!')
+        removeProduct =Math.floor(removeProduct)
         if (typeof removeProduct != 'number') return unsuccess(res, 400, ' removeProduct must be a number!')
         //  if you want, like removeProduct = 2 then remove quantity by 2 for that comment  line
         if (removeProduct < 0 || removeProduct > 1) return unsuccess(res, 400, ' removeProduct value is only 0 and 1 !')
-
+            
         // is a valid id 
         if (!vfy.isValidObjectId(userId)) return unsuccess(res, 400, ' Invalid userId !')
 
@@ -180,18 +181,15 @@ const updateCart = async (req, res) => {
                 break;
             }
             else {
+
                 return res.status(400).send({status :false , Message:"this product'id is not available ...pls try another"})
             }
         }
         if (!cart.items[flag]) { return res.status(400).send({ status: false, Message: "item is not present or already deleted" }) }
-
+    
         if (flag >= 0) {
             if (cart.items[flag].quantity < removeProduct) return res.status(400).send({ status: false, Message: ` Can't remove, please provide removeProduct <= ${cart.items[flag].quantity} !` })
-            //     else {
-            //         return res.status(400).send({status:false , Message:"item you are trying to remove does not exist in your cart"})
-            //     }
-            // }
-            // remove item(s) 1 or all
+           
             if (removeProduct == 0) {
                 // update price
                 let total = cart.totalPrice - (product.price * cart.items[flag].quantity)
@@ -211,6 +209,10 @@ const updateCart = async (req, res) => {
                 }
             }
         }
+
+           if(cart.items.length==0){
+            cart.totalPrice=0;
+           }
             // update quantity
             cart.totalItems = cart.items.length
             // update cart

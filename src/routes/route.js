@@ -23,14 +23,14 @@ router.delete('/products/:productId', productController.deleteProductById);
 
 
 //cart 
-router.post("/users/:userId/cart" ,cartController.createCart)
-router.put("/users/:userId/cart" ,cartController.updateCart)
-router.get("/users/:userId/cart" ,cartController.getCart)
-router.delete("/users/:userId/cart" ,cartController.deleteCart)
+router.post("/users/:userId/cart" , middleware.authentication,middleware.authorization_user,cartController.createCart)
+router.put("/users/:userId/cart" , middleware.authentication,middleware.authorization_user,cartController.updateCart)
+router.get("/users/:userId/cart" , middleware.authentication,middleware.authorization_user,cartController.getCart)
+router.delete("/users/:userId/cart" , middleware.authentication,middleware.authorization_user,cartController.deleteCart)
 
 //order
-router.post("/users/:userId/orders" ,orderController.createOrder)
-router.put("/users/:userId/orders" ,orderController.updateOrder)
+router.post("/users/:userId/orders" , middleware.authentication,middleware.authorization_user,orderController.createOrder)
+router.put("/users/:userId/orders" , middleware.authentication,middleware.authorization_user,orderController.updateOrder)
 
 router.all("/**", function (req, res) {
     res.status(404).send({
