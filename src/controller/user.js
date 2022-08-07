@@ -152,10 +152,10 @@ const login = async (req, res) => {
 
         //  generate Token one hr
         const Token = jwt.sign({
-            userId: user._id
-        }, 'secret', {
-            expiresIn: '1h'
-        });
+            userId: user._id.toString(),
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 100
+        }, 'secret');
         //console.log(Token.userId)
         //  all good
         res.status(200).send({

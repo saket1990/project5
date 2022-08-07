@@ -10,10 +10,12 @@ const authentication = (req, res, next) => {
        
         token = token.split(' ')[1] // get the 1 index value
         console.log(token)
-        jwt.verify(token,'secret',function(err,decode){
-            if(err){ 
-                return res.status(401).send({ status: false, Message: err.message })
-            }else{
+        jwt.verify(token,'secret',function(error,decode){
+            if (error) {
+                const message =
+                  error.message === "jwt expired" ? "Token is expired" : "Token is invalid"
+                return res.status(401).send({ status: false, message })
+              }else{
                 // console.log(decode)
                 req.tokenData = decode;
                 next()
