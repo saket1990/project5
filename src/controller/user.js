@@ -11,7 +11,7 @@ const saltRounds = 10;
 const createUser = async function (req, res) {
     try {
         const requestBody = req.body
-        console.log(requestBody)
+        
         if (vfy.isEmptyObject(requestBody)) return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
         
         let { fname, lname, email, phone, password, address } = requestBody
@@ -93,7 +93,7 @@ const createUser = async function (req, res) {
         if (usedMobileNumber) return res.status(400).send({ status: false, Message: "This Mobile no. is already registerd" });
 
         // ================================= qws file upload here==========================>>
-        if (!vfy.acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
+        if (!vfy.acceptFileType(files[0], 'image/jpeg','image/jpg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
 
         const profilePicture = await uploadFile(files[0])
 
@@ -204,7 +204,7 @@ const update = async (req, res) => {
         const data = req.body
         //  console.log(data)
         const files = req.files
-        console.log( files)
+        
         const userId = req.params.userId
         
         //if(vfy.isEmptyObject(data) && vfy.isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY or file must be required!" })
@@ -219,8 +219,6 @@ const update = async (req, res) => {
 
         //  de-structure data
         let { fname, lname, email, phone, password, address } = data
-        
-        console.log(data)
         
         if(fname){
             if(vfy.isEmptyVar(fname))return res.status(400).send({status:false , Message:"fname should not be empty"})
@@ -320,7 +318,7 @@ const update = async (req, res) => {
         }
 
         if (!vfy.isEmptyFile(files)) {
-            if (!vfy.acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
+            if (!vfy.acceptFileType(files[0], 'image/jpeg','image/jpeg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
 
             const profilePicture = await uploadFile(files[0])
             user.profileImage = profilePicture
@@ -335,7 +333,7 @@ const update = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        
         res.status(500).send({
             status: !true,
             Message: error.message

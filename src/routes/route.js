@@ -15,9 +15,8 @@ router.put('/user/:userId/profile' , middleware.authentication,middleware.author
 
 
 router.post('/products', productController.createProduct);
-router.get('/getProducts' ,productController.getProduct )
+router.get('/Products' ,productController.getProduct )
 router.get('/products/:productId' ,productController.getProductById)
-//router.get('/products/:productId',getProductById)
 router.put('/products/:productId', productController.updateProduct);
 router.delete('/products/:productId', productController.deleteProductById);
 
